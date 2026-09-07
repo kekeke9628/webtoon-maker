@@ -410,8 +410,13 @@
     const GEMINI_TIMEOUT_MS = 30000;
     const IMAGE_TIMEOUT_MS = 60000;
     const MAX_IMAGE_DIMENSION = 1024;
-    // Pollinations 익명 티어는 15초에 1회로 제한된다 (무료 가입 시 5초)
-    const IMAGE_REQUEST_INTERVAL_MS = 15000;
+    // Pollinations 인증: 브라우저 앱은 Bearer 토큰 대신 referrer로 앱을 식별한다.
+    // 공식 문서가 "Never put Bearer tokens in frontend code"라고 명시하고 있고,
+    // 이 파일은 공개 저장소에 있는 정적 HTML이라 토큰을 넣으면 그대로 노출된다.
+    // 이 값은 비밀이 아니며, Pollinations 계정에 등록된 도메인과 일치해야 Seed 티어가 적용된다.
+    const POLLINATIONS_REFERRER = 'kekeke9628.github.io';
+    // 요청 간격: 익명 15초/회, 가입(Seed) 5초/회
+    const IMAGE_REQUEST_INTERVAL_MS = 5000;
 
     // 응답이 멎었을 때 무한 대기하지 않도록 모든 fetch에 타임아웃을 건다
     function fetchWithTimeout(url, options = {}, timeoutMs = GEMINI_TIMEOUT_MS) {
@@ -746,7 +751,7 @@
           const enhancedPrompt = `${characterSheet}, ${panel}, ${artStyle}`;
 
           // Pollinations.ai 엔진 다이렉트 호출 (시드값 통일로 일관성 향상)
-          const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=1024&height=1024&nologo=true&seed=${globalSeed}`;
+          const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=1024&height=1024&nologo=true&seed=${globalSeed}&referrer=${encodeURIComponent(POLLINATIONS_REFERRER)}`;
 
           const imgResponse = await fetchWithTimeout(imgUrl, {}, IMAGE_TIMEOUT_MS);
           if (imgResponse.status === 429) throw new Error(`컷 ${i+1}: 요청 한도에 걸렸습니다. 잠시 후 다시 시도해주세요.`);
